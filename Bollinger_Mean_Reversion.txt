@@ -1,0 +1,87 @@
+{ 
+  === CODE ===
+  Bollinger Bands Mean Reversion
+  Logic: Enter when price touches/extreme of bands, exit when returns to SMA
+}
+
+Inputs: 
+    Length(20),      
+    NumDevs(2),     
+    size(1),         
+    multi(2);
+Variables:
+    UpperBand(0),
+    LowerBand(0),
+    SMA(0),
+    StdDev(0);
+
+SMA = Average(Close, Length);
+StdDev = StandardDev(Close, Length, 1);
+UpperBand = SMA + (NumDevs * StdDev);
+LowerBand = SMA - (NumDevs * StdDev);
+
+
+value1 = entryprice - (averagetruerange(14)[1] * multi);
+value2 = entryprice + (averagetruerange(14)[1] * multi);
+
+
+{ Long entry: price closes below lower band }
+If MarketPosition = 0 Then Begin
+    If Close < LowerBand Then
+        Buy size contract next bar at market;
+End;
+
+{ Short entry: price closes above upper band }
+If MarketPosition = 0 Then Begin
+    If Close > UpperBand Then
+        SellShort size contract next bar at market;
+End;
+
+{ Exit long: price crosses above SMA }
+If MarketPosition = 1 Then Begin
+    If Close > SMA Then
+        Sell size contract next bar at market;
+End;
+
+{ Exit short: price crosses below SMA }
+If MarketPosition = -1 Then Begin
+    If Close < SMA Then
+        BuyToCover size contract next bar at market;
+End;
+
+
+if marketposition <> 0 then begin 
+    sell size contract next bar value1 stop;
+    buytocover size contract next bar at value2 stop;
+end;
+
+
+setexitonclose;
+
+
+{ 
+  === ANALYSIS ===
+  # Bollinger Bands Mean Reversion intraday
+
+  **Source file:** `Bollinger_Mean_Reversion.txt`
+
+  ## Implemented Logic
+  - **Long Entry:** When price closes below the lower Bollinger Band (mean reversion expectation: price will bounce up).
+  - **Short Entry:** When price closes above the upper Bollinger Band (expectation: price will drop down).
+  - **Exit:** When price crosses the middle band (SMA), signaling a return toward the mean.
+
+  ## Why It's Interesting
+  - **Mean reversion logic:** Exploits the statistical property that price tends to revert to its average after extreme moves.
+  - **Simple and visual:** Bollinger Bands are widely recognized; easy to interpret and test.
+  - **No stop loss (by design):** Relies on the mean reversion assumption; can be combined with volatility stops for risk management.
+
+  ## References
+  - John Bollinger, *Bollinger on Bollinger Bands* (2002)
+  - Classic mean reversion strategy described in many trading research books.
+
+  ## Possible Variants (to explore in other snippets)
+  - Add a filter (e.g., RSI < 30 for long, > 70 for short).
+  - Use percentage bands instead of standard deviation.
+  - Implement a time stop.
+  - Scale into positions as price moves further away from the mean.
+}
