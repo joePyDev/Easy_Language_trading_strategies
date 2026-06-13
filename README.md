@@ -8,10 +8,6 @@ The revisited snippets come from:
 - Proprietary implementations
 - External sources (e.g., trading research)
 
-## Structure
-
-- `/src` – code snippets (.EL, .txt)
-- `/analysis` – brief reports and comments on the snippets
 
 ## Disclaimer
 
