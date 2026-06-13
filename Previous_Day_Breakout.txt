@@ -1,0 +1,76 @@
+{ 
+  === CODE ===
+  Previous Day Breakout
+  Logic: Enter when price exceeds yesterday's high or low.
+  
+}
+
+Inputs: 
+    size(1),
+    ma_period(20); 
+
+
+Variables:
+    PrevDayHigh(0),
+    PrevDayLow(0),
+    my_map(0),
+    mov_avg(0),
+    ok_short(false),
+    ok_long(false),
+    Counter(0);
+
+
+my_map = marketposition;
+mov_avg = average(close,ma_period);
+
+
+{ Calculate previous day's high and low }
+PrevDayHigh = HighS(1);
+PrevDayLow = LowS(1);
+
+
+if sessionlastbar then Counter = 0;
+if counter = 2 then begin;
+    ok_short = True;
+    ok_long = True; 
+end;    
+
+
+if my_map = 0 then begin
+    if ok_long and close > mov_avg then
+    buy size contract next bar at PrevDayHigh stop;
+    if ok_short and close < mov_avg then
+    sellshort size contract next bar at PrevDayLow stop;
+end;    
+
+
+if my_map <> 0 then begin 
+    sell size contract next bar at mov_avg stop;
+    ok_long = False;
+    buytocover size contract next bar at mov_avg stop;
+    ok_short = false;
+end;    
+
+
+counter = Counter + 1;
+
+{ 
+  === ANALYSIS ===
+  # Previous Day Breakout
+
+  **Source file:** `Previous_Day_Breakout.txt`
+
+  ## Implemented Logic
+  - **Entry Long:** When price closes above yesterday's high, buy stop at that level.
+  - **Entry Short:** When price closes below yesterday's low, sell stop at that level.
+
+  ## References
+  - Common pattern in "daily breakout" systems described in many trading research books (e.g., Toby Crabel's "Opening Range Breakout").
+  - Used by day traders and swing traders.
+
+  ## Possible Variants (to explore in other snippets)
+  - Use the opening range (first 30/60 minutes) instead of full previous day.
+  - Add a filter (e.g., require yesterday's range to be above average).
+  - Combine with volatility (ATR) for a dynamic buffer.
+  - Remove time exit for swing trading (hold multiple days).
+}
